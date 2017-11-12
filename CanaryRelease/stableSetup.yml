@@ -136,9 +136,9 @@
       npm:
         path: /home/checkboxio/server-side/site
 
-    - name: Install loadbalancer packages based on package.json
-      npm:
-        path: /home/
+    # - name: Install loadbalancer packages based on package.json
+    #   npm:
+    #     path: /home/
 
     - name: Installing hearbeats.js for loadbalancer
       npm:
@@ -155,13 +155,13 @@
       tags:
         - run
 
-    - name: Run load balancer 
-      shell: "nodejs infrastructure.js"
-      args:
-        chdir: /home/checkboxio/server-side/site/
-      async: 10
-      poll: 0
-      tags:
-        - run
+    # - name: Run load balancer 
+    #   shell: "nodejs infrastructure.js"
+    #   args:
+    #     chdir: /home/checkboxio/server-side/site/
+    #   async: 10
+    #   poll: 0
+    #   tags:
+    #     - run
 
 
