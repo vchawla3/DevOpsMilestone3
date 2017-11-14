@@ -153,33 +153,35 @@
       wait_for:
         host: "{{ item.public_dns_name }}"
         port: 22
-        delay: 10
+        delay: 30
         timeout: 320
         state: started
       with_items:
         - "{{ iTrust_WS.tagged_instances }}"
-        #- "{{ iTrust_DS.tagged_instances }}"
+        - "{{ iTrust_DS.tagged_instances }}"
         #- "{{ iTrust_LB.instances }}"
 
 
-# - name: Configure DB instance
-#   hosts: iTrust_Database
-#   gather_facts: False
-#   become: yes
-#   pre_tasks:
-#     - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
-#       become: yes
-#   roles:
-#     #- python
-#     - mysql
+- name: Configure DB instance
+  hosts: iTrust_Database
+  gather_facts: False
+  become: yes
+  pre_tasks:
+    - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
+      become: yes
+  roles:
+    #- python
+    - mysql
 
 - name: Configure Webservers
   hosts: iTrust_webservers
+  serial: 1
   #become: True
   gather_facts: False
 
   pre_tasks:
     - debug: var=db_private_ip
+
     - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
       become: yes
 

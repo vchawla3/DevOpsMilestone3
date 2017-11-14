@@ -37,17 +37,22 @@ skip-grant-tables
 skip-external-locking
 
 log_error = /var/log/mysql/error.log
-#key_buffer              = 16M
+key_buffer_size          = 16M
 #max_allowed_packet      = 16M
-#thread_stack            = 192K
-#thread_cache_size       = 8
-#query_cache_limit       = 1M
-#query_cache_size        = 16M
+thread_stack            = 192K
+thread_cache_size       = 8
+query_cache_limit       = 1M
+query_cache_size        = 16M
 
+expire_logs_days        = 10
+max_binlog_size         = 100M
 
 [mysqld_safe]
 #socket          = /var/run/mysqld/mysqld.sock
 
+
+[isamchk]
+key_buffer              = 16M
 
 
 !includedir /etc/mysql/conf.d/

@@ -69,7 +69,7 @@
   with_items:
     - localhost
     - ::1
-    - %
+    - "%"
 
 - name: ensure no anon users in DB
   become: yes

@@ -58,6 +58,8 @@
       dest: /home/{{ansible_ssh_user}}/iTrust/development
       #remote_src: yes
       copy: false
+      owner: "{{ansible_ssh_user}}"
+      mode: 0777 #!!!!!!!!NEED TO FOLLOW BEST PRACTICE FILE PERMISSIONS FOR PRODUCTION
     become: yes
     when: st.stat.exists == False
 
@@ -82,6 +84,7 @@
       dest: "/home/{{ansible_ssh_user}}/iTrustSource/"
       clone: yes
       update: yes
+      force: yes
 
   - debug: var=ds
 
@@ -89,9 +92,8 @@
     become: yes
     lineinfile:
       dest: /home/{{ansible_ssh_user}}/iTrustSource/iTrust/WebRoot/META-INF/context.xml
-      regexp: "url=\"jdbc:mysql://localhost:\""
-      line: "url=\"jdbc:mysql://\"{{ds}}\":3306/itrust?createDatabaseIfNotExist=true\""
-
+      regexp: "\turl=\"jdbc:mysql://localhost:3306"
+      line: "url=\"jdbc:mysql://{{ds}}:3306/itrust?createDatabaseIfNotExist=true\""
 
 
   - name: run maven to package the application
