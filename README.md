@@ -38,7 +38,7 @@
 
 ## Screencasts
 
-Checkbox Production Deployment/Canary Release/Proxy/Alerts [HERE](https://youtu.be/LeLG2DdaVX4)
+Checkbox Production Deployment/Canary Release/Proxy/Alerts [HERE](https://youtu.be/LeLG2DdaVX4) [MORE DETAILS HERE](https://github.ncsu.edu/kmishra/CM3/blob/master/CanaryRelease/README.md)
 
 
 
