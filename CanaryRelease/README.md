@@ -11,7 +11,7 @@
 - Once a push to our master branch for checkbox occurs, the stable job will run and delete the current droplet of checkbox (if exists), get a new droplet, and then configure it.
 	- On the same job, if the loadbalancer is also running, the loadbalancer will also be redeployed so it will then route to the new stable droplet.
 	- If the loadbalancer/canary has not yet been deployed, then only the stable will be redeployed.
-- Once a push to our canary branch for checkbox occurs, the canary job will run and delete the canary/loadbalancer droplets, get new droplets, and redeploy both.
+- Once a push to our canary branch for checkbox occurs, the canary job will run and delete the canary/loadbalancer droplets (if they exist), get new droplets, and redeploy both.
 - The load balancer/proxy (infrastructure.js) routes 60% of the traffic to the stable, and 40% of the traffic to the canary.
 	- The load balancer/proxy does a request every 3 seconds to get the status of the canary instance. If the canary returns a status of 503, then the proxy will no longer route any traffic to canary.
 	- The load balancer/proxy will continue to check the status until it returns 200, then it will start rerouting 40% of the traffic again to the canary.
