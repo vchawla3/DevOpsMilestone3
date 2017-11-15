@@ -35,9 +35,10 @@ defaults
 frontend app_front
   bind *:80
   mode http
-  default_backend app
+  default_backend app_backend
 
-backend app
+
+backend app_backend
 
   balance {{ balance }}
 {% for host in ws_instances %}

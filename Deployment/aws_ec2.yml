@@ -77,6 +77,7 @@
       add_host:
         hostname: "{{ item.public_ip }}"
         groupname: iTrust_webservers
+        backend_name: "{{item.private_dns_name}}"
       with_items: "{{ iTrust_WS.tagged_instances }}"
 
 
@@ -163,7 +164,7 @@
       wait_for:
         host: "{{ item.public_dns_name }}"
         port: 22
-        delay: 10
+        delay: 2
         timeout: 320
         state: started
       with_items:
@@ -189,16 +190,16 @@
     - {role: haproxy, lb_public_ip: "{{hostvars['localhost']['lb_public_ip']}}", ws_instances: "{{hostvars['localhost']['ws_tagged_instances']}}" }
 
 
-- name: Configure DB instance
-  hosts: iTrust_Database
-  gather_facts: False
-  become: yes
-  pre_tasks:
-    - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
-      become: yes
-  roles:
-    #- python
-    - mysql
+# - name: Configure DB instance
+#   hosts: iTrust_Database
+#   gather_facts: False
+#   become: yes
+#   pre_tasks:
+#     - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
+#       become: yes
+#   roles:
+#     #- python
+#     - mysql
 
 - name: Configure Webservers
   hosts: iTrust_webservers
@@ -212,10 +213,15 @@
       become: yes
 
       #For rolling update
+    - debug: var=hostvars["{{inventory_hostname}}"]
+    #- set_fact:
+        #backend_name: hostvars["{{inventory_hostname}}"].
+
     - name: disable server in haproxy
-      shell: echo "disable server episode46/{{ inventory_hostname }}" | socat stdio /var/lib/haproxy/stats
+      shell: echo "disable server app_backend/{{ hostvars[inventory_hostname].backend_name }} " | socat stdio /var/lib/haproxy/stats
       delegate_to: "{{ item }}"
       with_items: "{{ groups['iTrust_loadbalancer'] }}"
+      become_user: root
       become: yes
 
   roles:
@@ -224,7 +230,8 @@
   post_tasks:
 
     - name: enable server in haproxy
-      shell: echo "enable server episode46/{{ inventory_hostname }}" | socat stdio /var/lib/haproxy/stats
+      shell: echo "enable server app_backend/{{ hostvars[inventory_hostname].backend_name }} " | socat stdio /var/lib/haproxy/stats
       delegate_to: "{{ item }}"
       with_items: "{{ groups['iTrust_loadbalancer'] }}"
+      become_user: root
       become: yes
