@@ -1,4 +1,0 @@
-#!/bin/sh
-
-echo "get new updates!"
-GIT_WORK_TREE=/home/checkboxio/ git checkout -f
