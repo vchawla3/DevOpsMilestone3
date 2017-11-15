@@ -3,7 +3,7 @@
 ## PreTasks
 - An empty droplet to configure jenkins on
 - The IP address for that droplet set in the inventory/jenkinsInventory
-- Same IP address set for Jenkins (Git plugin) service in the checkbox.io repository being deployed (formatted like http://{{Jenkins IP}}.60:8080/) - this is will hit '/git/nofitfyCommit/' to jenkins and trigger jobs set to poll (set up by ansible).
+- Same IP address set for Jenkins (Git plugin) service in the checkbox.io repository being deployed (formatted like http://{{Jenkins IP}}:8080/) - this is will hit '/git/nofitfyCommit/' to jenkins and trigger jobs set to poll (set up by ansible).
 - Environment variable DOTOKEN set to user's digital ocean token on ansible host machine.
 
 ## To Run
