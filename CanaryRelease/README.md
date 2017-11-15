@@ -1,11 +1,12 @@
 # Canary Release
 
 ## PreTasks
-	- an empty droplet to configure jenkins on
-	- the IP address for that droplet set in the inventory/jenkinsInventory
-	- environment variable DOTOKEN set on ansible host machine.
+	An empty droplet to configure jenkins on
+	The IP address for that droplet set in the inventory/jenkinsInventory
+	Environment variable DOTOKEN set on ansible host machine.
+
 ## To Run
-	* ansible-playbook main.yml -i inventory/jenkinsInventory
+	ansible-playbook main.yml -i inventory/jenkinsInventory
 	
 ## Deployment Notes
 - Once a push to our master branch for checkbox occurs, the stable job will run and delete the current droplet of checkbox (if exists), get a new droplet, and then configure it.
