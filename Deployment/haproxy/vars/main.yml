@@ -7,13 +7,15 @@ mode: http
 # Port on which HAProxy should listen
 listenport: 8888
 
+tomcatport: 8080
+
 # A name for the proxy daemon, this wil be the suffix in the logs.
 daemonname: tomcat_balance
 
 # Balancing Algorithm. Available options:
 # roundrobin, source, leastconn, source, uri
 # (if persistance is required use, "source")
-balance: roundrobin 
+balance: roundrobin
 
 # Username & Password for stats
 # in HAProxy

@@ -83,33 +83,34 @@
     - debug: var=iTrust_WS  #msg="{{ ansible_env.PATH }}"
 
 
-    # - name: Launch Load Balancer
-    #   ec2:
-    #      key_name: "{{ ec2_keypair }}" #"{{ lookup('env','aws_access_key_id') }}"
-    #      group: "{{ ec2_security_group }}"
-    #      instance_type: "{{ ec2_instance_type }}"
-    #      image: "{{ ec2_image }}"
-    #      wait: true
-    #      region: "{{ ec2_region }}"
-    #      vpc_subnet_id: "{{ ec2_subnet_ids|random }}"
-    #      instance_tags: '{"Name":"LB","Type":"iTrust"}'
-    #      assign_public_ip: yes
-    #      exact_count: "{{ec2_instance_count}}"
-    #      count_tag:
-    #        Name: "LB"
-    #        type: "iTrust"
-    #      volumes:
-    #        - device_name: /dev/sda1
-    #          device_type: gp2
-    #          volume_size: 10
-    #          delete_on_termination: true
-    #   register: iTrust_LB #WebServers
-    #
-    # - name: Add new instance to host group
-    #   add_host:
-    #     hostname: "{{ item.public_ip }}"
-    #     groupname: iTrust_loadbalancer
-    #   with_items: "{{ iTrust_LB.instances }}"
+    - name: Launch Load Balancer
+      ec2:
+         key_name: "{{ ec2_keypair }}" #"{{ lookup('env','aws_access_key_id') }}"
+         group: "{{ ec2_security_group }}"
+         instance_type: "{{ ec2_instance_type }}"
+         image: "{{ ec2_image }}"
+         wait: true
+         region: "{{ ec2_region }}"
+         vpc_subnet_id: "{{ ec2_subnet_ids|random }}"
+         instance_tags: '{"Name":"LB","Type":"iTrust"}'
+         assign_public_ip: yes
+         exact_count: 1
+         count_tag:
+           Name: "LB"
+           Type: "iTrust"
+         volumes:
+           - device_name: /dev/sda1
+             device_type: gp2
+             volume_size: 10
+             delete_on_termination: true
+      register: iTrust_LB #WebServers
+
+    - name: Add new instance to host group
+      add_host:
+        hostname: "{{ item.public_ip }}"
+        groupname: iTrust_loadbalancer
+      with_items: "{{ iTrust_LB.tagged_instances }}"
+
 
     - name: Launch DB Server
       ec2:
@@ -146,6 +147,15 @@
         db_private_ip: "{{ item.private_ip }}"
       with_items:  "{{ iTrust_DS.tagged_instances }}"
 
+
+    - set_fact:
+        lb_public_ip: "{{ item.public_ip }}"
+      with_items:  "{{ iTrust_LB.tagged_instances }}"
+
+    - set_fact:
+        ws_tagged_instances: "{{ iTrust_WS.tagged_instances }}"
+
+
     - debug: var=db_private_ip
 
 
@@ -153,13 +163,30 @@
       wait_for:
         host: "{{ item.public_dns_name }}"
         port: 22
-        delay: 30
+        delay: 10
         timeout: 320
         state: started
       with_items:
         - "{{ iTrust_WS.tagged_instances }}"
         - "{{ iTrust_DS.tagged_instances }}"
-        #- "{{ iTrust_LB.instances }}"
+        - "{{ iTrust_LB.tagged_instances }}"
+
+
+
+- name: Configure LoadBalancer
+  hosts: iTrust_loadbalancer
+  #become: True
+  gather_facts: False
+
+  pre_tasks:
+
+    - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
+      become: yes
+
+    - debug: var="{{hostvars['localhost']['ws_tagged_instances']}}"
+
+  roles:
+    - {role: haproxy, lb_public_ip: "{{hostvars['localhost']['lb_public_ip']}}", ws_instances: "{{hostvars['localhost']['ws_tagged_instances']}}" }
 
 
 - name: Configure DB instance
@@ -180,17 +207,24 @@
   gather_facts: False
 
   pre_tasks:
-    - debug: var=db_private_ip
 
     - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
       become: yes
 
+      #For rolling update
+    - name: disable server in haproxy
+      shell: echo "disable server episode46/{{ inventory_hostname }}" | socat stdio /var/lib/haproxy/stats
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['iTrust_loadbalancer'] }}"
+      become: yes
+
   roles:
     - {role: deploy_iTrust, ds: "{{hostvars['localhost']['db_private_ip']}}" }
-  # tasks:
-  #
-  #
-  #   - include_role:
-  #       name: deploy_iTrust
-  #     vars:
-  #       ds: "{{ db_private_ip }}"
+
+  post_tasks:
+
+    - name: enable server in haproxy
+      shell: echo "enable server episode46/{{ inventory_hostname }}" | socat stdio /var/lib/haproxy/stats
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['iTrust_loadbalancer'] }}"
+      become: yes
