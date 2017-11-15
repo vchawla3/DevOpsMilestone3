@@ -8,7 +8,7 @@
 ## To Run
 	ansible-playbook main.yml -i inventory/jenkinsInventory
 	
-## Deployment Notes
+## Checkbox Deployment (Stable/Canary) Notes
 - Once a push to our master branch for checkbox occurs, the stable job will run and delete the current droplet of checkbox (if exists), get a new droplet, and then configure it.
 	- On the same job, if the loadbalancer is also running, the loadbalancer will also be redeployed so it will then route to the new stable droplet.
 	- If the loadbalancer/canary has not yet been deployed, then only the stable will be redeployed.
