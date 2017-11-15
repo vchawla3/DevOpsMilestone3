@@ -190,16 +190,16 @@
     - {role: haproxy, lb_public_ip: "{{hostvars['localhost']['lb_public_ip']}}", ws_instances: "{{hostvars['localhost']['ws_tagged_instances']}}" }
 
 
-# - name: Configure DB instance
-#   hosts: iTrust_Database
-#   gather_facts: False
-#   become: yes
-#   pre_tasks:
-#     - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
-#       become: yes
-#   roles:
-#     #- python
-#     - mysql
+- name: Configure DB instance
+  hosts: iTrust_Database
+  gather_facts: False
+  become: yes
+  pre_tasks:
+    - raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
+      become: yes
+  roles:
+    #- python
+    - mysql
 
 - name: Configure Webservers
   hosts: iTrust_webservers
