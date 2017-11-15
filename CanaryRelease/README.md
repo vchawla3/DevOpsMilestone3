@@ -1,9 +1,9 @@
 # Canary Release
 
 ## PreTasks
-	An empty droplet to configure jenkins on
-	The IP address for that droplet set in the inventory/jenkinsInventory
-	Environment variable DOTOKEN set on ansible host machine.
+- An empty droplet to configure jenkins on
+- The IP address for that droplet set in the inventory/jenkinsInventory
+- Environment variable DOTOKEN set on ansible host machine.
 
 ## To Run
 	ansible-playbook main.yml -i inventory/jenkinsInventory
