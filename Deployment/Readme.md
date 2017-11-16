@@ -19,7 +19,10 @@ Use the following command to run playbook to set up Build Servers:
 
   ansible-playbook install_jenkins.yml -u <Default user of your EC2 Ubuntu instance> --private-key=<Your EC2 Private Key> -i inventory.ini --ask-become-pass
 
+## Note
+We have set up a Github webhook that will be trigger build jobs for us when we push to our master (our Production branch)
+
 
 ## Screen Cast Link
 
-[Link to Screencast](https://youtu.be/su7yViKR9DU)
+[Link to Screencast](https://youtu.be/R8VpypU8uqE)

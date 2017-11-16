@@ -61,7 +61,7 @@
          region: "{{ ec2_region }}"
          vpc_subnet_id: "{{ ec2_subnet_ids|random }}"
          instance_tags: '{"Name":"Webserver","Type":"iTrust"}'
-         assign_public_ip: yes
+         assign_public_ip: no
          exact_count: "{{ec2_instance_count}}"
          count_tag:
            Name: "Webserver"
@@ -75,7 +75,7 @@
 
     - name: Add new instance to host group
       add_host:
-        hostname: "{{ item.public_ip }}"
+        hostname: "{{ item.private_ip }}"
         groupname: iTrust_webservers
         backend_name: "{{item.private_dns_name}}"
       with_items: "{{ iTrust_WS.tagged_instances }}"

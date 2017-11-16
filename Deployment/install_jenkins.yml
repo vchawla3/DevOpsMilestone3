@@ -1,16 +1,114 @@
 ---
-- hosts: nodes
+
+- name: Create a sandbox instance
+  hosts: localhost
+  connection: local
+  #ansible_python_interpreter: python
+  #gather_facts: False
+
+  # vars:
+  #   key_name: my_keypair
+  #   instance_type: m1.small
+  #   security_group: my_securitygroup
+  #   image: my_ami_id
+  #   region: us-east-1
+
+  environment:
+    #PATH: ~/.local/bin:{{ ansible_env.PATH }}
+    PATH: "{{ ansible_env.PATH }}:~/.local/bin"
+
+  pre_tasks:
+    - include_vars: iTrustVars.yml
+
+  tasks:
+    - name: Update repositories cache and install pip package
+      apt:
+        name: python-pip
+        #upgrade: dist
+        update_cache: yes
+      become: true
+
+    - name: pip install awscli --user --upgrade
+      pip:
+       name: boto
+      become: true
+
+    - name: pip install awscli --user --upgrade
+      pip:
+       name: awscli
+       extra_args: --user --upgrade
+
+    # - name: Checks if the environment file already has an entry for the PATH
+    #   replace: dest=~/.profile regexp="PATH=(.*)" replace="PATH=\1"
+    #   register: checkIfPATHIsHere
+    #
+    # - name: Add a PATH entry with {{extrapath}} if the PATH is not already defined
+    #   lineinfile: dest=~/.profile state=present line="PATH={{aws_cli_path}}" regexp='' insertafter=EOF
+    #   when: checkIfPATHIsHere.changed == false
+    #
+    # - name: add {{extrapath}} to the PATH
+    #   lineinfile: dest=~/.profile state=present backrefs=no regexp="PATH=(["])((?!.?{{aws_cli_path}}).?)(["])$" line="PATH=\1\2:{{extra_path}}\3"
+    #   when: checkIfPATHIsHere.changed
+
+
+    - name: Launch jenkins server
+      ec2:
+         key_name: "{{ ec2_keypair }}" #"{{ lookup('env','aws_access_key_id') }}"
+         group: "{{ ec2_security_group }}"
+         instance_type: "{{ ec2_instance_type }}"
+         image: "{{ ec2_image }}"
+         wait: true
+         region: "{{ ec2_region }}"
+         vpc_subnet_id: "{{ ec2_subnet_ids|random }}"
+         instance_tags: '{"Name":"Jenkins","Type":"iTrust"}'
+         assign_public_ip: yes
+         exact_count: 1
+         count_tag:
+           Name: "Jenkins"
+           Type: "iTrust"
+         volumes:
+           - device_name: /dev/sda1
+             device_type: gp2
+             volume_size: 10
+             delete_on_termination: true
+      register: iTrust_BS #BuildServers
+
+    - name: Add new instance to host group
+      add_host:
+        hostname: "{{ item.public_ip }}"
+        groupname: iTrust_jenkins
+      with_items: "{{ iTrust_BS.tagged_instances }}"
+
+    - name: Wait for SSH to come up
+      wait_for:
+        host: "{{ item.public_dns_name }}"
+        port: 22
+        delay: 20
+        timeout: 320
+        state: started
+      with_items:
+        - "{{ iTrust_BS.tagged_instances }}"
+
+
+    - debug: var=iTrust_BS  #msg="{{ ansible_env.PATH }}"
+
+
+- name: Setup jenkins server
+  hosts: iTrust_jenkins
+  gather_facts: False
 
   vars:
     - my_jenkins_params:
         url_username: admin
-        url_password: placeholder
-        url: sampleURL
     - oracle_java_version: 8
     - oracle_java_home: "/usr/lib/jvm/java-{{ oracle_java_version }}-oracle"
-    - home_path: /home/
+    - home_path: /home/ubuntu
 
   tasks:
+    - name: Install Python #https://gist.github.com/gwillem/4ba393dceb55e5ae276a87300f6b8e6f
+      raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
+      become: yes
+
     - name: Install required system packages.
       apt: pkg={{ item }} state=present update-cache=yes
       with_items:
@@ -28,27 +126,58 @@
         - libssl-dev
       become: yes
 
+    - name: upgrade pip
+      shell: pip install --upgrade pip
+      become: yes
+
     # To get latest ansible, updgrade needed (https://github.com/ansible/ansible/issues/31741)
     - name: install setuptools
+      become: yes
       pip:
         name: setuptools
-        extra_args: --upgrade
+        extra_args: --upgrade pip
+      ignore_errors: True
 
     - name: install pyopenssl
+      become: yes
       pip:
         name: pyopenssl
+      ignore_errors: True
 
     - name: install ndg-httpsclient
+      become: yes
       pip:
         name: ndg-httpsclient
+      ignore_errors: True
 
     - name: install pyasn1
+      become: yes
       pip:
         name: pyasn1
+      ignore_errors: True
 
-    - name: install ansible
-      pip:
+
+    - name: Install software-properties-common
+      become: yes
+      apt:
+        name: software-properties-common
+        update_cache: yes
+
+    - apt_repository:
+        repo: 'ppa:ansible/ansible'
+      become: yes
+
+    - name: Install Ansible
+      become: yes
+      apt:
         name: ansible
+        update_cache: yes
+
+    - name: Install dos2unix
+      become: yes
+      apt:
+        name: dos2unix
+        update_cache: yes
 
     # Java for jenkins
     - name: Adding Java ppa
@@ -83,26 +212,26 @@
         update_cache: yes
 
     #Install nodejs latest
-    - name: Add Nodesource apt key.
-      apt_key:
-        url: https://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1655A0AB68576280
-        id: "68576280"
-        state: present
-
-    - name: Add NodeSource repositories for Node.js.
-      apt_repository:
-        repo: "{{ item }}"
-        state: present
-      with_items:
-        - "deb https://deb.nodesource.com/node_6.x trusty main"
-      register: node_repo
-
-    - name: Update apt cache if repo was added.
-      apt: update_cache=yes
-      when: node_repo.changed
-
-    - name: Ensure Node.js and npm are installed.
-      apt: "name=nodejs=6* state=present"
+    # - name: Add Nodesource apt key.
+    #   apt_key:
+    #     url: https://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1655A0AB68576280
+    #     id: "68576280"
+    #     state: present
+    #
+    # - name: Add NodeSource repositories for Node.js.
+    #   apt_repository:
+    #     repo: "{{ item }}"
+    #     state: present
+    #   with_items:
+    #     - "deb https://deb.nodesource.com/node_6.x trusty main"
+    #   register: node_repo
+    #
+    # - name: Update apt cache if repo was added.
+    #   apt: update_cache=yes
+    #   when: node_repo.changed
+    #
+    # - name: Ensure Node.js and npm are installed.
+    #   apt: "name=nodejs=6* state=present"
 
 
     #Jenkins
@@ -177,7 +306,7 @@
         var: my_jenkins_params.url_username
 
     - set_fact:
-       new_params: "{{ my_jenkins_params|combine({'url_password':'{{ admin_pass.stdout }}'}, recursive=True) }}"
+       new_params: "{{ my_jenkins_params }}" # |combine({'url_password':'{{ admin_pass.stdout }}'}, recursive=True)
 
     - set_fact:
        URL: "http://{{ ansible_ssh_host }}:8080"
@@ -195,37 +324,53 @@
     - name: Install jenkin subversion plugin
       jenkins_plugin:
         name: subversion
-        params: "{{new_jenkins_params}}"
+        params: "{{new_params}}"
+        url_password: "{{admin_pass.stdout}}"
+        url: "{{URL}}"
+
+
 
     - name: Install jenkin github branch source plugin
       jenkins_plugin:
         name: github-branch-source
-        params: "{{new_jenkins_params}}"
+        params: "{{new_params}}"
+        url_password: "{{admin_pass.stdout}}"
+        url: "{{URL}}"
 
     - name: Install jenkin ssh-slaves plugin
       jenkins_plugin:
         name: ssh-slaves
-        params: "{{new_jenkins_params}}"
+        params: "{{new_params}}"
+        url_password: "{{admin_pass.stdout}}"
+        url: "{{URL}}"
 
     - name: Install jenkin antplugin
       jenkins_plugin:
         name: ant
-        params: "{{new_jenkins_params}}"
+        params: "{{new_params}}"
+        url_password: "{{admin_pass.stdout}}"
+        url: "{{URL}}"
 
     - name: Install jenkin workflow-aggregator
       jenkins_plugin:
         name: workflow-aggregator
-        params: "{{new_jenkins_params}}"
+        params: "{{new_params}}"
+        url_password: "{{admin_pass.stdout}}"
+        url: "{{URL}}"
 
     - name: Install jenkin pipeline-github-lib
       jenkins_plugin:
         name: pipeline-github-lib
-        params: "{{new_jenkins_params}}"
+        params: "{{new_params}}"
+        url_password: "{{admin_pass.stdout}}"
+        url: "{{URL}}"
 
     - name: Install jenkin postbuild task plugin
       jenkins_plugin:
         name: postbuild-task
-        params: "{{new_jenkins_params}}"
+        params: "{{new_params}}"
+        url_password: "{{admin_pass.stdout}}"
+        url: "{{URL}}"
 
 # restart jenkins once plugins are installed
 
@@ -241,13 +386,15 @@
       wait_for: timeout=120
       delegate_to: localhost
 
-    #setup jenkins user to have sudo no passwd 
+    #setup jenkins user to have sudo no passwd
     - name: Make sure we have a 'wheel' group
+      become: yes
       group:
         name: wheel
         state: present
 
     - name: Allow 'wheel' group to have passwordless sudo
+      become: yes
       lineinfile:
         dest: /etc/sudoers
         state: present
@@ -256,6 +403,7 @@
         validate: visudo -cf %s
 
     - name: Add jenkins users to wheel group
+      become: yes
       user:
         name: jenkins
         groups: "wheel, ssh"
@@ -266,6 +414,7 @@
         - wheel
 
     - name: Add root users to wheel group
+      become: yes
       user:
         name: root
         groups: "wheel"
@@ -313,21 +462,21 @@
         path: "{{home_path}}/iTrust.xml"
         state: absent
 
-    - name: make sure home/Development exists
+    - name: make sure home/Deployment exists
       file:
-        path: "{{home_path}}/Development"
+        path: "{{home_path}}/Deployment"
         state: directory
 
     - name: copy over all files in the deployment folder
       copy:
-        src: "{{ item }}"
-        dest: "{{home_path}}/Development"
-      with_fileglob:
-        - /*
+        src:  ./ #"{{ item }}"
+        dest: "{{home_path}}/Deployment"
+      #with_fileglob:
+        #- ./*
 
     - name: remove install_jenkins from machine
       file:
-        path: "{{home_path}}/Development/install_jenkins.yml"
+        path: "{{home_path}}/Deployment/install_jenkins.yml"
         state: absent
 
     - name: copy over environment variables source file
@@ -335,3 +484,7 @@
         src: secret_iam.env
         dest: "{{home_path}}/secret_iam.env"
         #mode: 0777
+
+    - name: Dos2Unix of source file
+      shell: dos2unix "{{home_path}}/secret_iam.env"
+      become: yes

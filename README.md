@@ -34,7 +34,7 @@
 +--+-- install_jenkins.yml  
 +--+-- inventory.ini     
 +-- README.md   
-  
+
 
 ## Screencasts
 
@@ -43,5 +43,4 @@ Checkbox Production Deployment/Canary Release/Proxy/Alerts [SCREENCAST HERE](htt
 Nomad & Redis [ScreenCast](https://youtu.be/yNJcn4j7Z9E)
 
 
-
- 
+iTrust Deployment and Rolling Update [ScreenCast](https://youtu.be/R8VpypU8uqE)
