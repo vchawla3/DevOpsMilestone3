@@ -4,7 +4,7 @@
 ### Team
 | Name     |      Unity ID     |  Contribution |
 |----------|:-----------------:|----------------:|
-| Kushagra Mishra |  kmishra | nomad,  redis    |
+| Kushagra Mishra |  kmishra | nomad,  redis, documentation    |
 | Webb Chawla |    vchawla3   |   canary , checkbox, proxy, documentation |
 | Bhavya Bansal | bbansal | jenkins, ssh setup, droplet setup, documentation    |
 | Ananthram Eklaspuram | aeklasp| iTrust, rolling update, documentation   |
