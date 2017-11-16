@@ -147,14 +147,14 @@
     #   npm:
     #     path: /home/
 
-    - name: Run checkboxio app 
-      shell: "( export MONGO_PORT=3002 && export MONGO_IP=127.0.0.1 && export MONGO_USER=admin && export MONGO_PASSWORD=admin && nodejs server.js >/dev/null 2>&1 &)"
-      args:
-        chdir: /home/checkboxio/server-side/site/
-      async: 10
-      poll: 0
-      tags:
-        - run
+    # - name: Run checkboxio app 
+    #   shell: "( export MONGO_PORT=3002 && export MONGO_IP=127.0.0.1 && export MONGO_USER=admin && export MONGO_PASSWORD=admin && nodejs server.js >/dev/null 2>&1 &)"
+    #   args:
+    #     chdir: /home/checkboxio/server-side/site/
+    #   async: 10
+    #   poll: 0
+    #   tags:
+    #     - run
 
     # - name: Run load balancer 
     #   shell: "nodejs infrastructure.js"

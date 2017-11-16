@@ -15,9 +15,6 @@
 
   tasks:
 
-  - name: Create droplets 
-    shell: ls
-
   - name: Add Ansible Repo
     become: yes
     apt_repository: repo=ppa:ansible/ansible
