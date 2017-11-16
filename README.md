@@ -40,6 +40,8 @@
 
 Checkbox Production Deployment/Canary Release/Proxy/Alerts [SCREENCAST HERE](https://youtu.be/LeLG2DdaVX4) & [IMPLEMENTATION DETAILS HERE](https://github.ncsu.edu/kmishra/CM3/blob/master/CanaryRelease/README.md)
 
+Nomad & Redis [ScreenCast](https://youtu.be/yNJcn4j7Z9E)
+
 
 
  
