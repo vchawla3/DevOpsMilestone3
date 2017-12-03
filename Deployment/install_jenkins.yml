@@ -402,6 +402,7 @@
         line: '%wheel ALL=(ALL) NOPASSWD: ALL'
         validate: visudo -cf %s
 
+
     - name: Add jenkins users to wheel group
       become: yes
       user:
@@ -488,3 +489,13 @@
     - name: Dos2Unix of source file
       shell: dos2unix "{{home_path}}/secret_iam.env"
       become: yes
+    
+    - include_role:
+        name: python
+    
+      
+    - include_role:
+        name: Monitoring
+      vars: 
+        device_name: "newrelic-infra.yml.jenkins.j2"
+

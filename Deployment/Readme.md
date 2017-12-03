@@ -2,15 +2,21 @@
 
 ## Initial Setup Required
 
-###1. AWS API Keys
+### 1. AWS API Keys
 Place a file named "secret_iam.env" in the Deployment folder with your AWS Security credentials in the following format:
 
 	export ANSIBLE_HOST_KEY_CHECKING=False
 	export AWS_ACCESS_KEY_ID='AK123'
 	export AWS_SECRET_ACCESS_KEY='abc123'
 
-###2. AWS private key for EC2 instances
+### 2. AWS private key for EC2 instances
 Place your EC2 private key in the Deployment folder
+
+### 3. Update the NewRelic License key in the template files in Monitoring role 
+```
+license_key: <Your license key here>
+display_name: Database_{{ ansible_hostname }}
+```
 
 
 ## To Run

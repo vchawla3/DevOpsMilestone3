@@ -12,28 +12,96 @@
 
 ## File Structure
 
-+-- CanaryRelease  
-+--+-- checkBoxCanary   
-+--+-- checkBoxStable    
-+--+-- inventory  
-+--+-- loadbalancer  
-+--+-- node_modules     
-+--+-- ansibleSetupOnJenkins.yml   
-+--+-- install_jenkins.yml   
-+--+-- main.yml  
-+--+-- setupSSHJenkins.yml   
-+-- Deployment   
-+--+-- deploy_iTrust/tasks    
-+--+-- haproxy  
-+--+-- mysql  
-+--+-- python/tasks     
-+--+-- aws_ec2.yml   
-+--+-- deploy_iTrust.yml   
-+--+-- iTrust.xml  
-+--+-- iTrustVars.yml  
-+--+-- install_jenkins.yml  
-+--+-- inventory.ini     
-+-- README.md   
+```
+.
+├── CanaryRelease
+│   ├── ansibleSetupOnJenkins.yml
+│   ├── checkboxCanary
+│   │   ├── canarySetup.yml
+│   │   ├── checkboxCanary.xml
+│   │   ├── createCanary.yml
+│   │   └── post-receive
+│   ├── checkboxStable
+│   │   ├── checkboxStable.xml
+│   │   ├── createStable
+│   │   ├── createStable.yml
+│   │   └── stableSetup.yml
+│   ├── install_jenkins.yml
+│   ├── inventory
+│   │   ├── canaryInventory
+│   │   ├── jenkinsInventory
+│   │   ├── loadBalancerInventory
+│   │   └── stableInventory
+│   ├── loadbalancer
+│   │   ├── createLoadBalancer.yml
+│   │   ├── infrastructure.js
+│   │   ├── loadBalancerSetup.yml
+│   │   ├── package.json
+│   │   └── package-lock.json
+│   ├── main.yml
+|   ├──node_modules
+│   ├── README.md
+│   └── setupSSHJenkins.yml
+├── Deployment
+│   ├── aws_ec2.yml
+│   ├── deploy_iTrust
+│   │   └── tasks
+│   │       └── main.yml
+│   ├── haproxy
+│   │   ├── files
+│   │   │   └── haproxy_default
+│   │   ├── handlers
+│   │   │   └── main.yml
+│   │   ├── tasks
+│   │   │   └── main.yml
+│   │   ├── templates
+│   │   │   └── haproxy.cfg.j2
+│   │   └── vars
+│   │       └── main.yml
+│   ├── install_jenkins.yml
+│   ├── inventory.ini
+│   ├── iTrustVars.yml
+│   ├── iTrust.xml
+│   ├── MyEC2KeyPair.pem
+│   ├── mysql
+│   │   ├── tasks
+│   │   │   └── main.yml
+│   │   ├── templates
+│   │   │   └── my.cnf.j2
+│   │   └── vars
+│   │       └── main.yml
+│   ├── python
+│   │   └── tasks
+│   │       └── python_pretask.yml
+│   ├── Readme.md
+│   └── secret_iam.env
+├── README.md
+├── redis_nomad
+│   ├── ansible.cfg
+│   ├── inventory.sample
+│   ├── playbooks
+│   │   ├── bootstrap-cluster.yml
+│   │   ├── configure-control-server.yml
+│   │   ├── configure_redis.yml
+│   │   ├── install-nomad.yml
+│   │   ├── main.yml
+│   │   ├── requirements.yml
+│   │   ├── stableSetup.yml
+│   │   ├── templates
+│   │   │   ├── checbox.nomad
+│   │   │   ├── checkbox.nomad
+│   │   │   ├── redis_master.conf
+│   │   │   ├── redis_slave.conf
+│   │   │   └── service.nomad
+│   │   ├── test.yaml
+│   │   └── vars.yml
+│   └── README.md
+└── temp.txt
+
+156 directories, 627 files
+
+
+```
 
 
 ## Screencasts

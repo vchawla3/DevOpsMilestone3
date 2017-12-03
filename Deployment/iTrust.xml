@@ -37,7 +37,7 @@ cd /home/ubuntu;
 source secret_iam.env;
 export ANSIBLE_HOST_KEY_CHECKING=False;
 cd Deployment;
-ansible-playbook aws_ec2.yml -u ubuntu --private-key=MyEC2KeyPair.pem -i inventory.ini;
+sudo ansible-playbook aws_ec2.yml -u ubuntu --private-key=MyEC2KeyPair.pem -i inventory.ini;
       </command>
     </hudson.tasks.Shell>
   </builders>

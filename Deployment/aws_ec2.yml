@@ -61,7 +61,7 @@
          region: "{{ ec2_region }}"
          vpc_subnet_id: "{{ ec2_subnet_ids|random }}"
          instance_tags: '{"Name":"Webserver","Type":"iTrust"}'
-         assign_public_ip: no
+         assign_public_ip: yes
          exact_count: "{{ec2_instance_count}}"
          count_tag:
            Name: "Webserver"
@@ -75,7 +75,7 @@
 
     - name: Add new instance to host group
       add_host:
-        hostname: "{{ item.private_ip }}"
+        hostname: "{{ item.public_ip }}" #"{{ item.private_ip }}"
         groupname: iTrust_webservers
         backend_name: "{{item.private_dns_name}}"
       with_items: "{{ iTrust_WS.tagged_instances }}"
@@ -188,6 +188,7 @@
 
   roles:
     - {role: haproxy, lb_public_ip: "{{hostvars['localhost']['lb_public_ip']}}", ws_instances: "{{hostvars['localhost']['ws_tagged_instances']}}" }
+    - {role: Monitoring, device_name: "newrelic-infra.yml.lb.j2" }
 
 
 - name: Configure DB instance
@@ -200,6 +201,7 @@
   roles:
     #- python
     - mysql
+    - {role: Monitoring, device_name: "newrelic-infra.yml.db.j2" }
 
 - name: Configure Webservers
   hosts: iTrust_webservers
@@ -226,6 +228,7 @@
 
   roles:
     - {role: deploy_iTrust, ds: "{{hostvars['localhost']['db_private_ip']}}" }
+    - {role: Monitoring, device_name: "newrelic-infra.yml.web.j2" }
 
   post_tasks:
 
